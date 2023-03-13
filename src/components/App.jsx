@@ -17,17 +17,16 @@ export const App = () => {
   const [modalImg, setModalImg] = useState('');
   const [modalAlt, setModalAlt] = useState('');
  
-   
   const handleSubmit = async e => {
     e.preventDefault();
     setIsLoading(true);
     const inputForSearch = e.target.elements.inputForSearch;
-   
+    
     const response = await fetchImages(inputForSearch.value, 1);
     setImages(response);
     setIsLoading(false);
     setCurrentSearch(inputForSearch.value);
-    setPageNr(1);
+    setPageNr(2);
   };
   
 
@@ -69,7 +68,7 @@ export const App = () => {
         paddingBottom: '24px',
       }}
     >
-      {isLoading ? (
+      {isLoading && (pageNr === 1)? (
         <Loader />
       ) : (
         <React.Fragment>
@@ -77,7 +76,8 @@ export const App = () => {
           <ImageGallery
             onImageClick={handleImageClick}
             images={images}
-          />
+            />
+          {isLoading && (pageNr >= 2) ? <Loader /> : null}
           {images.length > 0 ? (
             <Button onClick={handleClickMore} />
           ) : null}
