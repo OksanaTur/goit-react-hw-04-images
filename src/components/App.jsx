@@ -7,36 +7,50 @@ import { Loader } from "./Loader/Loader";
 import { Modal } from "./Modal/Modal";
 
 
-
 export const App = () => {
   const [images, setImages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [currentSearch, setCurrentSearch] = useState('');
-  const [pageNr, setPageNr] = useState(1);
+  const [pageNr, setPageNr] = useState(0);
   const [modalOpen, setModalOpen] = useState(false);
   const [modalImg, setModalImg] = useState('');
   const [modalAlt, setModalAlt] = useState('');
- 
+
+  useEffect(() => {
+    if (!pageNr) {
+      return
+    }
+    const getImages = async () => {
+      try {
+        setIsLoading(true);
+        const response = await fetchImages(currentSearch, pageNr);
+        setImages(prevArray => [...prevArray, ...response]);
+      } catch (error) {
+        alert(error.message);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    getImages();
+  }, [currentSearch, pageNr]);
+
+
   const handleSubmit = async e => {
     e.preventDefault();
-    setIsLoading(true);
-    const inputForSearch = e.target.elements.inputForSearch;
-    
-    const response = await fetchImages(inputForSearch.value, 1);
-    setImages(response);
-    setIsLoading(false);
-    setCurrentSearch(inputForSearch.value);
-    setPageNr(2);
+    const inputForSearch = e.target.elements.inputForSearch.value;
+    if (inputForSearch.trim() === '' || inputForSearch === currentSearch) {
+      return;
+    }
+    setCurrentSearch(inputForSearch);
+    setPageNr(1);
+    setImages([]);
   };
-  
 
-   const handleClickMore = async () => {
-    setIsLoading({ isLoading: true });
-    const response = await fetchImages(currentSearch, pageNr);
-    setImages([...images, ...response]);
-    setIsLoading(false);
+
+  const handleClickMore = async () => {
     setPageNr(pageNr + 1);
   };
+
 
   const handleImageClick = e => {
     setModalOpen(true);
@@ -44,12 +58,14 @@ export const App = () => {
     setModalImg(e.target.name);
   };
 
+
   const handleModalClose = () => {
     setModalOpen(false);
     setModalImg('');
     setModalAlt('');
   };
- 
+
+
   useEffect(() => {
     const handleKeyDown = event => {
       if (event.code === 'Escape') {
@@ -58,7 +74,7 @@ export const App = () => {
     };
     window.addEventListener('keydown', handleKeyDown);
   }, []);
-    
+
   return (
     <div
       style={{
@@ -93,4 +109,3 @@ export const App = () => {
     </div>
   )
 };
-  
